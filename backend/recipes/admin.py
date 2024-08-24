@@ -13,6 +13,7 @@ class RecipeIngredientAdmin(admin.TabularInline):
     extra = 1
 
 
+@admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
 
     inlines = (RecipeTagAdmin, RecipeIngredientAdmin)
@@ -27,12 +28,12 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = ('tags',)
     empty_value_display = 'Не задано'
 
+    @admin.display(description='Количество в избранных')
     def count_favorite(self, obj):
         return obj.favorites.count()
 
-    count_favorite.short_description = 'Количество в избранных'
 
-
+@admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
 
     list_display = (
@@ -44,5 +45,3 @@ class IngredientAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Tag)
-admin.site.register(Ingredient, IngredientAdmin)
-admin.site.register(Recipe, RecipeAdmin)

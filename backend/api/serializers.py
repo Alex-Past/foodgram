@@ -253,12 +253,36 @@ class ShortRecipesSerializer(serializers.ModelSerializer):
         )
 
 
-class SubscriptionsSerializer(serializers.ModelSerializer):
+class SubscribeSerializer(serializers.ModelSerializer):
+    """Сериализатор для подписки."""
+    class Meta:
+        model = Subscriptions
+        fields = ('user', 'author')
+
+    def validate(self, data):
+        user = data.get('user').id
+        author = data.get('author').id
+        if user == author:
+            raise serializers.ValidationError(
+                'Вы не можете подписаться на самого себя.'
+            )
+        if Subscriptions.objects.filter(user=user, author=author).exists():
+            raise serializers.ValidationError(
+                'Вы уже подписаны на этого автора.'
+            )
+        return data
+
+    def create(self, validated_data):
+        user = validated_data.get('user')
+        author = validated_data.get('author')
+        return Subscriptions.objects.create(user=user, author=author)
+
+
+class SubscriptionsSerializer(UserSerializer):
     """Сериализатор для подписок."""
-    is_subscribed = serializers.SerializerMethodField()
+
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
-    avatar = Base64ImageField()
 
     class Meta:
         model = User
@@ -290,11 +314,6 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
             many=True,
             context=self.context
         ).data
-
-    def get_is_subscribed(self, obj):
-        return Subscriptions.objects.filter(
-            user=self.context['request'].user, author=obj
-        ).exists()
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()

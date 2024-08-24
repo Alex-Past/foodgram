@@ -3,7 +3,6 @@ from django_filters.rest_framework import (
     CharFilter,
     FilterSet,
     ModelMultipleChoiceFilter,
-    NumberFilter
 )
 
 from recipes.models import Recipe, Tag
@@ -11,7 +10,6 @@ from recipes.models import Recipe, Tag
 
 class RecipeFilter(FilterSet):
 
-    author = NumberFilter(field_name='author__id')
     is_in_shopping_cart = BooleanFilter(method='get_shopping_cart')
     is_favorited = BooleanFilter(method='get_favorite')
     tags = ModelMultipleChoiceFilter(

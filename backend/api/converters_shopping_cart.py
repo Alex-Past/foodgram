@@ -1,4 +1,5 @@
 from io import BytesIO
+
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -10,7 +11,7 @@ def pdf_shopping_cart(shopping_cart):
     response['Content-Disposition'] = (
         'attachment; filename="shopping_cart.pdf"'
     )
-    pdfmetrics.registerFont(TTFont('DejaVuSerif', 'DejaVuSerif.ttf', 'UTF-8'))
+    pdfmetrics.registerFont(TTFont('DejaVuSerif', 'data/Alternates.ttf'))
     buffer = BytesIO()
     p = canvas.Canvas(buffer)
     p.setFont('DejaVuSerif', 14)
