@@ -11,12 +11,12 @@ def pdf_shopping_cart(shopping_cart):
     response['Content-Disposition'] = (
         'attachment; filename="shopping_cart.pdf"'
     )
-    pdfmetrics.registerFont(TTFont('DejaVuSerif', 'data/Alternates.ttf'))
+    pdfmetrics.registerFont(TTFont('Alternates', 'data/Alternates.ttf'))
     buffer = BytesIO()
     p = canvas.Canvas(buffer)
-    p.setFont('DejaVuSerif', 14)
+    p.setFont('Alternates', 14)
     p.drawString(200, 800, 'Список покупок.')
-    p.setFont('DejaVuSerif', 14)
+    p.setFont('Alternates', 14)
     from_bottom = 750
     for number, ingredient in enumerate(shopping_cart, start=1):
         p.drawString(
