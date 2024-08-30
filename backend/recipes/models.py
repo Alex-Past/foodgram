@@ -8,8 +8,7 @@ from . constants import (ING_NAME_LENGHT,
                          MIN_ING_AMOUNT,
                          RECIPE_NAME_LENGHT,
                          TAG_NAME_LENGHT,
-                         TAG_SLUG_LENGHT,
-                         TEXT_LENGHT)
+                         TAG_SLUG_LENGHT)
 
 
 User = get_user_model()
@@ -55,7 +54,7 @@ class Recipe(models.Model):
         User, on_delete=models.CASCADE, related_name='recipes'
     )
     name = models.CharField(max_length=RECIPE_NAME_LENGHT)
-    text = models.TextField(max_length=TEXT_LENGHT)
+    text = models.TextField()
     image = models.ImageField(upload_to='recipes/images')
     cooking_time = models.PositiveIntegerField(
         validators=[MinValueValidator(
@@ -65,11 +64,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient, through='RecipeIngredient', related_name='recipes')
-    tags = models.ManyToManyField(
-        Tag,
-        through='RecipeTag',
-        related_name='recipes'
-    )
+    tags = models.ManyToManyField(Tag)
 
     class Meta:
         verbose_name = 'рецепт'
@@ -104,12 +99,6 @@ class RecipeIngredient(models.Model):
         ]
 
 
-class RecipeTag(models.Model):
-    """Модель тега рецепта."""
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-
-
 class FavotiteShoppingCartBaseModel(models.Model):
     """Базовая модель избранного и корзины."""
     user = models.ForeignKey(
@@ -130,6 +119,12 @@ class Favorites(FavotiteShoppingCartBaseModel):
 
     class Meta:
         default_related_name = 'favorites'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'user'],
+                name='unique_recipe_user_fav'
+            )
+        ]
 
 
 class ShoppingCart(FavotiteShoppingCartBaseModel):
@@ -137,3 +132,9 @@ class ShoppingCart(FavotiteShoppingCartBaseModel):
 
     class Meta:
         default_related_name = 'shopping_cart'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'user'],
+                name='unique_recipe_user_shop'
+            )
+        ]

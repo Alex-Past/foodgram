@@ -3,7 +3,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from .fields import Base64ImageField
+from api.fields import Base64ImageField
 from recipes.models import (Favorites, Ingredient,
                             Recipe,
                             RecipeIngredient,
@@ -124,9 +124,12 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         )
 
     def get_is_in_shopping_cart(self, obj):
-        return obj.shopping_cart.filter(
-            user=self.context['request'].user.id, recipe=obj
-        ).exists()
+        request = self.context.get('request')
+        return request and (
+            request.user.is_authenticated and obj.shopping_cart.filter(
+                user=request.user.id, recipe=obj
+            ).exists()
+        )
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -143,7 +146,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = (
             'ingredients',
             'tags',
-            'author',
             'image',
             'name',
             'text',
@@ -152,7 +154,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only_fields = ('author',)
 
     def validate(self, data):
-        ingredients = self.initial_data.get('ingredients')
+        ingredients = data.get('ingredients')
         if not ingredients:
             raise serializers.ValidationError(
                 'Нужен хотя бы один ингредиент.'
@@ -162,7 +164,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Ингредиенты не должны повторяться'
             )
-        tags = self.initial_data.get('tags')
+        tags = data.get('tags')
         if not tags:
             raise serializers.ValidationError('Нужен хотя бы один тег.')
         unique_tags = set(tags)
@@ -228,6 +230,13 @@ class SubscribeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscriptions
         fields = ('user', 'author')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=fields,
+                message='Вы уже подписаны на этого автора.'
+            )
+        ]
 
     def validate(self, data):
         user = data.get('user').id
@@ -236,16 +245,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Вы не можете подписаться на самого себя.'
             )
-        if Subscriptions.objects.filter(user=user, author=author).exists():
-            raise serializers.ValidationError(
-                'Вы уже подписаны на этого автора.'
-            )
         return data
-
-    def create(self, validated_data):
-        user = validated_data.get('user')
-        author = validated_data.get('author')
-        return Subscriptions.objects.create(user=user, author=author)
 
 
 class SubscriptionsSerializer(UserSerializer):
@@ -303,14 +303,8 @@ class FavoritesSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def create(self, validated_data):
-        model = self.Meta.model
-        recipe = validated_data.get('recipe')
-        user = validated_data.get('user')
-        return model.objects.create(recipe=recipe, user=user)
 
-
-class ShoppingCartSerializer(FavoritesSerializer):
+class ShoppingCartSerializer(serializers.ModelSerializer):
     """Сериализатор для рецептов в корзине."""
 
     class Meta:

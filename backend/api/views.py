@@ -84,7 +84,7 @@ class UserViewSet(djoser_views.UserViewSet):
             data={'user': request.user.id, 'author': author.id}
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user)
+        serializer.save()
         serializer = SubscriptionsSerializer(
             author,
             context={'request': request}
@@ -139,7 +139,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             data={'user': request.user.id, 'recipe': recipe.id}
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user)
+        serializer.save()
         serializer = ShortRecipesSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
