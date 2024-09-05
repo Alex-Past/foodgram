@@ -1,5 +1,6 @@
 import pyshorteners
 from django.db.models import Sum
+from django.views.generic import RedirectView
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
@@ -211,9 +212,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         short_url = pyshorteners.Shortener().clckru.short(url)
         return Response({'short-link': short_url}, status=status.HTTP_200_OK)
 
-    def redirect_to_recipe(request, short_link):
+
+class ShortLinkRedirectView(RedirectView):
+    """Представления для перенаправления ссылок."""
+    permanent = False
+
+    def get_redirect_url(self, *args, **kwargs):
+        short_link = kwargs['short_link']
         full_url = pyshorteners.Shortener().clckru.expand(short_link)
-        return redirect(full_url)
+        return full_url
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
