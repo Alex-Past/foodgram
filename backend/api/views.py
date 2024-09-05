@@ -1,7 +1,7 @@
 import pyshorteners
 from django.db.models import Sum
 from django.views.generic import RedirectView
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views as djoser_views
