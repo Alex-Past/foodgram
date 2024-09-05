@@ -206,7 +206,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(AllowAny,)
     )
     def get_short_link(self, request, pk=None):
-        url = request.build_absolute_uri()
+        url = request.build_absolute_uri(f'/recipes/{pk}/')
         short_url = pyshorteners.Shortener().clckru.short(url)
         return Response({'short-link': short_url}, status=status.HTTP_200_OK)
 
