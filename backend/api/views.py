@@ -203,13 +203,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         url_path=r'(?P<pk>\d+)/get-link',
-        url_name='short_link',
         permission_classes=(AllowAny,)
     )
     def get_short_link(self, request, pk=None):
         url = request.build_absolute_uri(f'/recipes/{pk}/')
         short_url = pyshorteners.Shortener().clckru.short(url)
-        return Response({'short-link': f'/s/{short_url}'},
+        host = request.get_host()
+        return Response({'short-link': f'http://{host}/s/{short_url}'},
                         status=status.HTTP_200_OK)
 
 
