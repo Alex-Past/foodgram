@@ -1,9 +1,10 @@
 from django.db.models import Sum
-from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views as djoser_views
-from rest_framework import views, viewsets, status
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -206,16 +207,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def get_short_link(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
-        short_link = f'{request.scheme}://{request.get_host()}/s/{recipe.id}'
+        short_link = request.build_absolute_uri(
+            reverse('recipes:short_link', args=[recipe.pk])
+        )
         return Response({'short-link': short_link}, status=status.HTTP_200_OK)
-
-
-class ShortLinkRedirectView(views.APIView):
-    """Редирект по короткой ссылке."""
-
-    def get(self, request, pk):
-        recipe = get_object_or_404(Recipe, id=pk)
-        return redirect(f'/recipes/{recipe.id}/')
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
