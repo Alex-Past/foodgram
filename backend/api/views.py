@@ -200,7 +200,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return pdf_shopping_cart(shopping_cart)
 
     @action(
-        detail=False,
+        detail=True,
         url_path=r'(?P<pk>\d+)/get-link',
         permission_classes=(AllowAny,)
     )
