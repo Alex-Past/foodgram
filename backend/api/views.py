@@ -201,13 +201,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        url_path=r'(?P<pk>\d+)/get-link',
+        url_path='get-link',
         permission_classes=(AllowAny,)
     )
     def get_short_link(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
         short_link = f'{request.scheme}://{request.get_host()}/s/{recipe.id}'
-        return Response({'short-link': short_link})
+        return Response({'short-link': short_link}, status=status.HTTP_200_OK)
 
 
 class ShortLinkRedirectView(views.APIView):
